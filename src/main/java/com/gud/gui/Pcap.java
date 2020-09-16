@@ -22,6 +22,22 @@ public class Pcap {
     private JScrollPane jScrollPane1;
     private JScrollPane jScrollPane2;
 
+    public DefaultTableModel getTableModel4dt() {
+        return tableModel4dt;
+    }
+
+    public void setTableModel4dt(DefaultTableModel tableModel4dt) {
+        this.tableModel4dt = tableModel4dt;
+    }
+
+    public DefaultTableModel getTableModel4lt() {
+        return tableModel4lt;
+    }
+
+    public void setTableModel4lt(DefaultTableModel tableModel4lt) {
+        this.tableModel4lt = tableModel4lt;
+    }
+
     private DefaultTableModel tableModel4dt;
     private DefaultTableModel tableModel4lt;
 
