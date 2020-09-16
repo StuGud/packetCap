@@ -19,6 +19,11 @@ public class Pcap {
     private JTable detailTable;
     private JComboBox nifComboBox;
     private JComboBox pacComboBox;
+    private JScrollPane jScrollPane1;
+    private JScrollPane jScrollPane2;
+
+    private DefaultTableModel tableModel4dt;
+    private DefaultTableModel tableModel4lt;
 
     private Loop loop;
 
@@ -31,7 +36,7 @@ public class Pcap {
                 //nifComboBox.getModel().getSelectedItem();
                 loop.setNif((String) nifComboBox.getModel().getSelectedItem());
                 loop.setPacketType((String) pacComboBox.getModel().getSelectedItem());
-                System.out.println("hello");
+
             }
         });
         listTable.addMouseListener(new MouseAdapter() {
@@ -48,6 +53,7 @@ public class Pcap {
     }
 
     private void init() {
+
         loop = new Loop();
 
         List<PcapNetworkInterface> allDevs = loop.getAllDevs();
@@ -56,10 +62,17 @@ public class Pcap {
         }
 
         //packetComboBox
-        //填充支持的协议？
         for (String packetType : loop.getPacketTypes()) {
             pacComboBox.addItem(packetType);
         }
+
+        final String[] columnNames1 = {"name", "time", "srcIp", "srcPort", "destIp", "destPort"};
+        tableModel4lt = new DefaultTableModel(null, columnNames1);
+        listTable.setModel(tableModel4lt);
+
+        final String[] columnNames2 = {"type", "content"};
+        tableModel4dt = new DefaultTableModel(null, columnNames2);
+        detailTable.setModel(tableModel4dt);
     }
 
     public static void main(String[] args) {
@@ -68,6 +81,7 @@ public class Pcap {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
+
     }
 
     {
@@ -87,12 +101,6 @@ public class Pcap {
     private void $$$setupUI$$$() {
         jPanel = new JPanel();
         jPanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(3, 3, new Insets(0, 0, 0, 0), -1, -1));
-        listTable = new JTable();
-        listTable.setEnabled(false);
-        jPanel.add(listTable, new com.intellij.uiDesigner.core.GridConstraints(2, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
-        detailTable = new JTable();
-        detailTable.setEnabled(false);
-        jPanel.add(detailTable, new com.intellij.uiDesigner.core.GridConstraints(2, 2, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(150, 50), null, 0, false));
         nifComboBox = new JComboBox();
         jPanel.add(nifComboBox, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 2, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         start = new JButton();
@@ -100,6 +108,16 @@ public class Pcap {
         jPanel.add(start, new com.intellij.uiDesigner.core.GridConstraints(0, 2, 2, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         pacComboBox = new JComboBox();
         jPanel.add(pacComboBox, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 2, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        jScrollPane1 = new JScrollPane();
+        jPanel.add(jScrollPane1, new com.intellij.uiDesigner.core.GridConstraints(2, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        listTable = new JTable();
+        listTable.setEnabled(false);
+        jScrollPane1.setViewportView(listTable);
+        jScrollPane2 = new JScrollPane();
+        jPanel.add(jScrollPane2, new com.intellij.uiDesigner.core.GridConstraints(2, 2, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        detailTable = new JTable();
+        detailTable.setEnabled(false);
+        jScrollPane2.setViewportView(detailTable);
     }
 
     /**

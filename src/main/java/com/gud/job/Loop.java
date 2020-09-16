@@ -2,8 +2,9 @@ package com.gud.job;
 
 import com.sun.jna.Platform;
 import org.pcap4j.core.*;
-import org.pcap4j.packet.IpV4Packet;
+import org.pcap4j.packet.*;
 
+import javax.swing.*;
 import java.util.Arrays;
 import java.util.List;
 
@@ -90,7 +91,24 @@ public class Loop {
 
         // 关闭网卡
         handle.close();
+
     }
+
+
+    private PacketListener getListener(){
+        return packet -> {
+            // 抓到报文走这里...
+            System.out.println(packet.getHeader());
+        };
+    }
+
+    private void updateListTable(JTable listTable,Packet packet){
+    }
+
+
+
+
+
 
     public PcapNetworkInterface getNif() {
         return nif;
@@ -102,6 +120,7 @@ public class Loop {
 
     public void setNif(String nif) {
         try {
+            System.out.println("select: "+nif);
             this.nif = Pcaps.getDevByName(nif);
         } catch (PcapNativeException e) {
             System.out.println("获取特定网卡失败");
@@ -110,7 +129,7 @@ public class Loop {
     }
 
     public List<String> getPacketTypes() {
-        return Arrays.asList("IPv4");
+        return Arrays.asList("IPv4","TCP","UDP","Http","ARP");
     }
 
     public void setPacketType(String packetTypeStr) {
@@ -118,9 +137,22 @@ public class Loop {
         switch (packetTypeStr){
             case "IPv4":
                 packetType= IpV4Packet.class;
-                System.out.println(packetType);
+                break;
+            case "TCP":
+                packetType= TcpPacket.class;
+                break;
+            case "UDP":
+                packetType= UdpPacket.class;
+                break;
+            case "Http":
+                //手动识别
+                packetType= TcpPacket.class;
+                break;
+            case "ARP":
+                packetType= ArpPacket.class;
                 break;
             default:
+                packetType= Packet.class;
                 break;
         }
     }
