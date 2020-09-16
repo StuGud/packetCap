@@ -1,6 +1,8 @@
 package com.gud.gui;
 
 import com.gud.job.Loop;
+import org.pcap4j.core.NotOpenException;
+import org.pcap4j.core.PcapNativeException;
 import org.pcap4j.core.PcapNetworkInterface;
 import org.pcap4j.packet.Packet;
 
@@ -24,7 +26,7 @@ public class Pcap {
     private JScrollPane jScrollPane2;
     private JTextArea packetDetailsTextArea;
 
-    private DefaultTableModel tableModel4lt;
+    public static DefaultTableModel tableModel4lt;
 
     private Loop loop;
 
@@ -37,7 +39,18 @@ public class Pcap {
                 //nifComboBox.getModel().getSelectedItem();
                 loop.setNif((String) nifComboBox.getModel().getSelectedItem());
                 loop.setPacketType((String) pacComboBox.getModel().getSelectedItem());
-
+                Thread t = new Thread() {
+                    public void run() {
+                        try {
+                            loop.cap();
+                        } catch (PcapNativeException pcapNativeException) {
+                            pcapNativeException.printStackTrace();
+                        } catch (NotOpenException notOpenException) {
+                            notOpenException.printStackTrace();
+                        }
+                    }
+                };
+                t.start();
                 packetDetailsTextArea.setText("");
             }
         });
@@ -70,13 +83,13 @@ public class Pcap {
             pacComboBox.addItem(packetType);
         }
 
-        final String[] columnNames1 = {"name", "time", "srcIp", "srcPort", "destIp", "destPort"};
+        final String[] columnNames1 = {"NO", "Time", "Source", "Destination", "Protocol", "Length", "Info"};
         tableModel4lt = new DefaultTableModel(null, columnNames1);
         listTable.setModel(tableModel4lt);
 
-        final String[] columnNames2 = {"type", "content"};
-        tableModel4dt = new DefaultTableModel(null, columnNames2);
-        detailTable.setModel(tableModel4dt);
+//        final String[] columnNames2 = {"type", "content"};
+//        tableModel4dt = new DefaultTableModel(null, columnNames2);
+//        detailTable.setModel(tableModel4dt);
     }
 
     public static void main(String[] args) {
@@ -95,7 +108,6 @@ public class Pcap {
     public void setTableModel4lt(DefaultTableModel tableModel4lt) {
         this.tableModel4lt = tableModel4lt;
     }
-
 
 
     {
@@ -129,9 +141,8 @@ public class Pcap {
         jScrollPane1.setViewportView(listTable);
         jScrollPane2 = new JScrollPane();
         jPanel.add(jScrollPane2, new com.intellij.uiDesigner.core.GridConstraints(2, 2, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        detailTable = new JTable();
-        detailTable.setEnabled(false);
-        jScrollPane2.setViewportView(detailTable);
+        packetDetailsTextArea = new JTextArea();
+        jScrollPane2.setViewportView(packetDetailsTextArea);
     }
 
     /**

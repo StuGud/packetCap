@@ -1,10 +1,11 @@
 package com.gud.job;
 
+import com.gud.gui.Pcap;
 import com.sun.jna.Platform;
 import org.pcap4j.core.*;
 import org.pcap4j.packet.*;
 
-import javax.swing.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -71,15 +72,73 @@ public class Loop {
       listener 会将侦听得到的 packet 作为回调参数 var1 传入 PacketListener 回调函数 void gotPacket(PcapPacket var1); 中
       所以 packet -> System.out.println(packet); 相当于实现了 PacketListener 接口, 其中实现的回调函数为将传入的 packet 直接输出
      */
-        PacketListener listener =
-            new PacketListener() {
+        //PacketListener listener = packet -> System.out.println(packet);
+        // 进一步的说, 以上代码就相当于下面的代码
+
+    //抓到报文回调gotPacket方法处理报文内容
+    PacketListener listener = new PacketListener() {
               @Override
               public void gotPacket(Packet packet) {
-                // 抓到报文走这里...
-                System.out.println(packet);
-              }
-            };
+                  System.out.println("发现敌情");
+                  List list=new ArrayList();
+                  if(packet.contains(ArpPacket.class))
+                  {
+                      list.add(packetKey);
+                      list.add("0.0.0");
+                      list.add(packet.get(ArpPacket.class).getHeader().getSrcHardwareAddr().toString());
+                      list.add(packet.get(ArpPacket.class).getHeader().getDstHardwareAddr().toString());
+                      list.add("ARP");
+                      list.add(packet.getRawData().length);
+                      list.add("Who has "+
+                              packet.get(ArpPacket.class).getHeader().getSrcProtocolAddr().toString()+
+                                      "? Tell "+
+                                      packet.get(ArpPacket.class).getHeader().getDstProtocolAddr().toString()
+                              );
+                  }
+                  else if(packet.contains(DnsPacket.class))
+                  {
+                      list.add(packetKey);
+                      list.add("0.0.0");
+                      list.add(packet.get(IpV4Packet.class).getHeader().getSrcAddr().toString());
+                      list.add(packet.get(IpV4Packet.class).getHeader().getDstAddr().toString());
+                      list.add("DNS");
+                      list.add(packet.getRawData().length);
+                      list.add(packet.get(DnsPacket.class).getHeader().getQuestions().toString()+
+                              packet.get(DnsPacket.class).getHeader().getAnswers().toString());
+                  }
+                  else if(packet.contains(IpV4Packet.class)) {
+                      list.add(packetKey);
+                      list.add("0.0.0");
+                      list.add(packet.get(IpV4Packet.class).getHeader().getSrcAddr().toString());
+                      list.add(packet.get(IpV4Packet.class).getHeader().getDstAddr().toString());
+                      list.add(packet.get(IpV4Packet.class).getHeader().getProtocol().toString());
+                      list.add(packet.getRawData().length);
 
+
+                      if (packet.contains(TcpPacket.class))
+                          list.add(packet.get(TcpPacket.class).getHeader().getSrcPort().toString()+
+                                  " -> "+
+                                  packet.get(TcpPacket.class).getHeader().getDstPort().toString()+
+                                  "  Seq="+packet.get(TcpPacket.class).getHeader().getSequenceNumber()+
+                                  " Ack="+packet.get(TcpPacket.class).getHeader().getAcknowledgmentNumber()+
+                                  " Win="+packet.get(TcpPacket.class).getHeader().getWindowAsInt()+
+                                  " Len"+packet.get(TcpPacket.class).getHeader().getRawData().length);
+                      else list.add(packet.get(UdpPacket.class).getHeader().getSrcPort().toString()+
+                              " -> "+
+                              packet.get(UdpPacket.class).getHeader().getDstPort().toString()+
+                              "  Len="+packet.get(UdpPacket.class).getHeader().getRawData().length);
+
+
+                  }
+                  if(list.size()!=0)
+                  {
+                      Pcap.tableModel4lt.addRow(list.toArray());
+                      packetMap.put(packetKey,packet);
+                      packetKey++;
+                  }
+                  }
+
+            };
 
         // 调用 loop 函数（还有许多其他捕获数据包的方法，日后再说）进行抓包，其中抓到的包则回调 listener 指向的回调函数
         try {
