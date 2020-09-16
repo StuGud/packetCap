@@ -1,83 +1,172 @@
 package com.gud.job;
 
-import org.pcap4j.core.Pcaps;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class RequestSender {
     String url;
 
-    public enum RequestType {
-        Get, Post, Patch, Delete, Put,
+    public enum RequestMethod {
+        GET,POST,HEAD,OPTIONS,PUT,DELETE,TRACE
     }
 
-    // HttpURLConnection方式
-    public void send(String urlStr, RequestType requestType, Map map) {
-
-
-        String SUBMIT_METHOD_GET = "GET";  // 一定要是大写，否则请求无效
-
-        //String urlStr = "http://timor.tech/api/holiday/year/";  // 请求http地址
-        String param = "2020";  // 请求参数
-
-        HttpURLConnection connection = null;
-        InputStream is = null;
-        BufferedReader br = null;
-        String result = null;  // 返回结果字符串
-        try {
-            // 创建远程url连接对象
-            URL url = new URL(urlStr);
-            // 通过远程url连接对象打开一个连接，强转成httpURLConnection类
-            connection = (HttpURLConnection) url.openConnection();
-            // 设置连接方式：GET
-            connection.setRequestMethod(SUBMIT_METHOD_GET);
-            // 设置连接主机服务器的超时时间：15000毫秒
-            connection.setConnectTimeout(15000);
-            // 设置读取远程返回的数据时间：60000毫秒
-            connection.setReadTimeout(60000);
-            // 发送请求
-            connection.connect();
-            // 通过connection连接，请求成功后获取输入流
-            if (connection.getResponseCode() == 200) {
-                is = connection.getInputStream();
-                // 封装输入流is，并指定字符集
-                br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-                // 存放数据
-                StringBuffer sbf = new StringBuffer();
-                String temp = null;
-                while ((temp = br.readLine()) != null) {
-                    sbf.append(temp);
-                }
-                result = sbf.toString();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            // 释放资源
-            if (null != br) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (null != is) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            connection.disconnect();  // 关闭远程连接
+    /**
+     * 注意！！！"Content-Type", "application/x-www-form-urlencoded"
+     * 现有代码使用而非JSON https://juejin.im/post/6844903870116675597
+     * 后期改进
+     * @param urlStr
+     * @param requestMethod
+     * @param map
+     */
+    public String send(String urlStr, RequestMethod requestMethod, Map<String,String> map) {
+        switch (requestMethod){
+            case GET:
+                return sendGetRequest(urlStr,map);
+            case POST:
+                return sendPostRequest(urlStr,map);
+            default:
+                return null;
         }
-        System.out.println("Successfully：" + result);
+    }
 
+    public String sendPostRequest(String urlStr,Map<String,String> map) {
+        String responseStr="";
+
+        try {
+            URL postUrl = new URL(urlStr);
+            HttpURLConnection connection = (HttpURLConnection) postUrl.openConnection();
+            // 设置是否向connection输出，因为这个是post请求，参数要放在http正文内，因此需要设为true
+            connection.setDoOutput(true);
+            connection.setRequestMethod(RequestMethod.POST.toString());
+            // Post 请求不能使用缓存
+            connection.setUseCaches(false);
+            //设置本次连接是否自动重定向
+            connection.setInstanceFollowRedirects(true);
+            // 配置本次连接的Content-type，配置为application/x-www-form-urlencoded的
+            // 意思是正文是urlencoded编码过的form参数
+            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            // 连接，从postUrl.openConnection()至此的配置必须要在connect之前完成，
+            // 要注意的是connection.getOutputStream会隐含的进行connect。
+            connection.connect();
+            DataOutputStream out = new DataOutputStream(connection
+                    .getOutputStream());
+
+            //暂时只支持string
+            String content = "";
+            if (map.size()!=0){
+                for (Map.Entry<String, String> entry : map.entrySet()) {
+                    content += URLEncoder.encode(entry.getKey(), "utf-8")
+                            + "="
+                            + URLEncoder.encode(entry.getValue(), "utf-8")
+                            + "&";
+                }
+                content=content.substring(0,content.length()-1);
+            }
+
+            // DataOutputStream.writeBytes将字符串中的16位的unicode字符以8位的字符形式写到流里面
+            out.writeBytes(content);
+            //流用完记得关
+            out.flush();
+            out.close();
+
+            responseStr = getResponseStr(connection);
+
+            connection.disconnect();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return responseStr;
+    }
+
+    /**
+     *
+     * @param urlStr
+     * @param map
+     * @return responseStr
+     */
+    public String sendGetRequest(String urlStr,Map<String,String> map){
+        String responseStr="";
+
+        //使用get请求参数创建getUrl
+        String getURL = urlStr;
+        if (map.size()!=0){
+            getURL+="?";
+            for (Map.Entry<String,String> entry:map.entrySet()) {
+                try {
+                    getURL+=URLEncoder.encode(entry.getKey(),"utf-8")
+                            +"="
+                            +URLEncoder.encode(entry.getValue(),"utf-8")
+                            +"&";
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
+            getURL=getURL.substring(0,getURL.length()-1);
+        }
+        //System.out.println(getURL);
+
+        try {
+            URL getUrl = new URL(getURL);
+            HttpURLConnection connection = (HttpURLConnection) getUrl
+                    .openConnection();
+            //System.out.println(RequestMethod.GET.toString());
+            connection.setRequestMethod(RequestMethod.GET.toString());
+            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+            connection.connect();
+
+            responseStr=getResponseStr(connection);
+
+            connection.disconnect();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return responseStr;
+    }
+
+    public static void main(String[] args) {
+        RequestSender requestSender=new RequestSender();
+        Map<String, String> map=new HashMap();
+
+        requestSender.sendGetRequest("http://localhost:8080/user/1",map);
+
+//        map.put("username","1");
+//        map.put("password","2");
+//        requestSender.sendPostRequest("http://localhost:8080/user/apiTest",map);
+
+    }
+
+    private String getResponseStr(HttpURLConnection connection){
+        String content="======== response ========";
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    connection.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+                content+="\n"+line;
+            }
+            reader.close();
+        }catch (IOException ioException){
+            ioException.printStackTrace();
+        }
+        return content;
+    }
+
+    public List<String> getRequestMethods(){
+        List<String> requestMethodList=new ArrayList<>();
+        for (RequestMethod requestMethod:RequestMethod.values()){
+            requestMethodList.add(requestMethod.toString());
+        }
+        return requestMethodList;
     }
 
     public String getUrl() {
