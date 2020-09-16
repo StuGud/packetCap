@@ -7,6 +7,7 @@ import org.pcap4j.packet.*;
 import javax.swing.*;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class Loop {
     // 设置 COUNT 常量，代表本次捕获数据包的数目，其中 -1 代表一直捕获
@@ -23,6 +24,17 @@ public class Loop {
 
     private PcapNetworkInterface nif;
     private Class<?> packetType;
+
+    public Map<Integer, Packet> getPacketMap() {
+        return packetMap;
+    }
+
+    public void setPacketMap(Map<Integer, Packet> packetMap) {
+        this.packetMap = packetMap;
+    }
+
+    private int packetKey=0;
+    private Map<Integer,Packet> packetMap;
 
     public List<PcapNetworkInterface> getAllDevs(){
         List<PcapNetworkInterface> allDevs = null;
@@ -59,19 +71,15 @@ public class Loop {
       listener 会将侦听得到的 packet 作为回调参数 var1 传入 PacketListener 回调函数 void gotPacket(PcapPacket var1); 中
       所以 packet -> System.out.println(packet); 相当于实现了 PacketListener 接口, 其中实现的回调函数为将传入的 packet 直接输出
      */
-        PacketListener listener = packet -> System.out.println(packet);
-        // 进一步的说, 以上代码就相当于下面的代码
-    /*
-    抓到报文回调gotPacket方法处理报文内容
-    PacketListener listener =
+        PacketListener listener =
             new PacketListener() {
               @Override
-              public void gotPacket(PcapPacket packet) {
+              public void gotPacket(Packet packet) {
                 // 抓到报文走这里...
                 System.out.println(packet);
               }
             };
-    */
+
 
         // 调用 loop 函数（还有许多其他捕获数据包的方法，日后再说）进行抓包，其中抓到的包则回调 listener 指向的回调函数
         try {
@@ -91,24 +99,21 @@ public class Loop {
 
         // 关闭网卡
         handle.close();
-
     }
 
 
     private PacketListener getListener(){
         return packet -> {
             // 抓到报文走这里...
-            System.out.println(packet.getHeader());
+            packetMap.put(packetKey,packet);
+            packetKey++;
         };
     }
 
-    private void updateListTable(JTable listTable,Packet packet){
+    public void clear(){
+        packetKey=0;
+        packetMap.clear();
     }
-
-
-
-
-
 
     public PcapNetworkInterface getNif() {
         return nif;
@@ -129,7 +134,7 @@ public class Loop {
     }
 
     public List<String> getPacketTypes() {
-        return Arrays.asList("IPv4","TCP","UDP","Http","ARP");
+        return Arrays.asList("All","IPv4","TCP","UDP","Http","ARP");
     }
 
     public void setPacketType(String packetTypeStr) {
@@ -151,8 +156,10 @@ public class Loop {
             case "ARP":
                 packetType= ArpPacket.class;
                 break;
-            default:
+            case "All":
                 packetType= Packet.class;
+                break;
+            default:
                 break;
         }
     }

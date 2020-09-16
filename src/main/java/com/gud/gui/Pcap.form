@@ -50,11 +50,9 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="23833" class="javax.swing.JTable" binding="detailTable">
+          <component id="12c62" class="javax.swing.JTextArea" binding="packetDetailsTextArea">
             <constraints/>
-            <properties>
-              <enabled value="false"/>
-            </properties>
+            <properties/>
           </component>
         </children>
       </scrollpane>
