@@ -34,6 +34,9 @@ public class ARPAttack {
     private JPanel srcIPPanel;
     private JPanel srcPortPanel;
 
+    public JPanel getArpAttackPanel() {
+        return arpAttackPanel;
+    }
 
     public ARPAttack() {
         init();

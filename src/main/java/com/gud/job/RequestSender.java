@@ -135,17 +135,17 @@ public class RequestSender {
         return responseStr;
     }
 
-    public static void main(String[] args) {
-        RequestSender requestSender=new RequestSender();
-        Map<String, String> map=new HashMap();
-
-        requestSender.sendGetRequest("http://localhost:8080/user/1",map);
-
-//        map.put("username","1");
-//        map.put("password","2");
-//        requestSender.sendPostRequest("http://localhost:8080/user/apiTest",map);
-
-    }
+//    public static void main(String[] args) {
+//        RequestSender requestSender=new RequestSender();
+//        Map<String, String> map=new HashMap();
+//
+//        requestSender.sendGetRequest("http://localhost:8080/user/1",map);
+//
+////        map.put("username","1");
+////        map.put("password","2");
+////        requestSender.sendPostRequest("http://localhost:8080/user/apiTest",map);
+//
+//    }
 
     private String getResponseStr(HttpURLConnection connection){
         String content="======== response ========";
