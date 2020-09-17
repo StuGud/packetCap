@@ -43,23 +43,22 @@ public class SendArpRequest {
 
     // 发送 ARP 请求的源 MAC地址, 需填写正确, 否则接收不到 ARP 响应, 格式为: "-" 或 ":" 分隔开
     // D0-C6-37-3E-7A-fB, d0-c6-37-3e-7a-fb, d0:c6:37:3e:7a:fb 均可, 不区分大小写
-    private static final MacAddress SRC_MAC_ADDR = MacAddress.getByName("26-DB-CA-BD-FB-4B");
-    private static final MacAddress DST_MAC_ADDR=MacAddress.getByName("a4-83-e7-88-35-6b");
+    //private static final MacAddress SRC_MAC_ADDR = MacAddress.getByName("26-DB-CA-BD-FB-4B");
+    //private static final MacAddress DST_MAC_ADDR=MacAddress.getByName("a4-83-e7-88-35-6b");
 
     // 响应的 MAC 地址IP：192.168.1.104 | MAC：60-14-B3-BB-C6-41 | 无线连接
     private static MacAddress resolvedAddr;
 
-    private SendArpRequest() {}
 
-    public static void get_ip_mac(){
-
-    }
-
-    public static void main(String[] args) throws PcapNativeException, NotOpenException {
+    public static void SendArpAttack(String nifStr,String srcIP,String srcMAC,String destIP,String destMAC,int rate) throws PcapNativeException, NotOpenException {
         // 源 IP 地址, 需填写正确
-        String strSrcIpAddress = "192.168.1.1"; // for InetAddress.getByName()
+        //String strSrcIpAddress = "192.168.1.1"; // for InetAddress.getByName()
+        MacAddress SRC_MAC_ADDR = MacAddress.getByName(srcMAC);
+        MacAddress DST_MAC_ADDR=MacAddress.getByName(destMAC);
+        String strSrcIpAddress = srcIP;
         // 目的 IP 地址, 需填写正确
-        String strDstIpAddress = "192.168.1.106"; // for InetAddress.getByName()
+        //String strDstIpAddress = "192.168.1.106"; // for InetAddress.getByName()
+        String strDstIpAddress = destIP;
 
         System.out.println(COUNT_KEY + ": " + COUNT);
         System.out.println(READ_TIMEOUT_KEY + ": " + READ_TIMEOUT);
@@ -67,12 +66,7 @@ public class SendArpRequest {
         System.out.println("\n");
 
         PcapNetworkInterface nif;
-        try {
-            nif = new NifSelector().selectNetworkInterface();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
+        nif=Pcaps.getDevByName(nifStr);
 
         if (nif == null) {
             return;
@@ -122,7 +116,7 @@ public class SendArpRequest {
                 System.out.println(p);
                 sendHandle.sendPacket(p);
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(rate*1000);
                 } catch (InterruptedException e) {
                     break;
                 }

@@ -1,8 +1,11 @@
 package com.gud.gui;
 
 import com.gud.job.Loop;
+import com.gud.job.SendArpRequest;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import org.pcap4j.core.NotOpenException;
+import org.pcap4j.core.PcapNativeException;
 import org.pcap4j.core.PcapNetworkInterface;
 
 import javax.swing.*;
@@ -20,9 +23,9 @@ public class ARPAttack {
     private JTextField srcPortTF;
     private JButton startBtn;
     private JTextArea destIPTextArea;
-    private JTextArea destPortTextArea;
+    private JTextArea destMACTextArea;
     private JTextArea srcIPTextArea;
-    private JTextArea srcPortTextArea;
+    private JTextArea srcMACTextArea;
     private JTextArea rateMinTextArea;
     private JTextField rateTF;
     private JPanel destIPPanel;
@@ -40,11 +43,19 @@ public class ARPAttack {
             public void actionPerformed(ActionEvent e) {
                 String nifStr = (String) nifCB.getModel().getSelectedItem();
                 String srcIP = srcIPTF.getText();
-                String srcPort = srcPortTF.getText();
+                String srcMAC = srcPortTF.getText();
                 String destIP = destIPTF.getText();
-                String destPort = destPortTF.getText();
+                String destMAC = destPortTF.getText();
                 int rate = Integer.parseInt(rateTF.getText());
                 int interval = 60 / rate;
+
+                try {
+                    SendArpRequest.SendArpAttack(nifStr, srcIP, srcMAC, destIP, destMAC, rate);
+                } catch (PcapNativeException pcapNativeException) {
+                    pcapNativeException.printStackTrace();
+                } catch (NotOpenException notOpenException) {
+                    notOpenException.printStackTrace();
+                }
 
                 //ARPAttack
             }
@@ -100,11 +111,11 @@ public class ARPAttack {
         destPortPanel = new JPanel();
         destPortPanel.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         arpAttackPanel.add(destPortPanel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE, 1, 1, null, null, null, 0, false));
-        destPortTextArea = new JTextArea();
-        destPortTextArea.setEditable(false);
-        destPortTextArea.setEnabled(false);
-        destPortTextArea.setText("destPort");
-        destPortPanel.add(destPortTextArea, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(64, 16), null, 0, false));
+        destMACTextArea = new JTextArea();
+        destMACTextArea.setEditable(false);
+        destMACTextArea.setEnabled(false);
+        destMACTextArea.setText("destMAC");
+        destPortPanel.add(destMACTextArea, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(64, 16), null, 0, false));
         destPortTF = new JTextField();
         destPortPanel.add(destPortTF, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         srcIPPanel = new JPanel();
@@ -120,11 +131,11 @@ public class ARPAttack {
         srcPortPanel = new JPanel();
         srcPortPanel.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
         arpAttackPanel.add(srcPortPanel, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE, 1, 1, null, null, null, 0, false));
-        srcPortTextArea = new JTextArea();
-        srcPortTextArea.setEditable(false);
-        srcPortTextArea.setEnabled(false);
-        srcPortTextArea.setText("srcPort");
-        srcPortPanel.add(srcPortTextArea, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(64, 16), null, 0, false));
+        srcMACTextArea = new JTextArea();
+        srcMACTextArea.setEditable(false);
+        srcMACTextArea.setEnabled(false);
+        srcMACTextArea.setText("srcMAC");
+        srcPortPanel.add(srcMACTextArea, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(64, 16), null, 0, false));
         srcPortTF = new JTextField();
         srcPortTF.setText("");
         srcPortPanel.add(srcPortTF, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
