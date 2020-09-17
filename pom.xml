@@ -33,6 +33,12 @@
             <artifactId>pcap4j-packetfactory-static</artifactId>
             <version>1.8.2</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.intellij/forms_rt -->
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>forms_rt</artifactId>
+            <version>7.0.3</version>
+        </dependency>
     </dependencies>
 
 

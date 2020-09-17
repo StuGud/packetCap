@@ -58,7 +58,7 @@ public class RequestSender {
             DataOutputStream out = new DataOutputStream(connection
                     .getOutputStream());
 
-            //暂时只支持string
+            //暂时只支持string类型的参数
             String content = "";
             if (map.size()!=0){
                 for (Map.Entry<String, String> entry : map.entrySet()) {
