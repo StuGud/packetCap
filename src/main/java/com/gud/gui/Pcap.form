@@ -38,8 +38,11 @@
           <component id="b2df4" class="javax.swing.JTable" binding="listTable">
             <constraints/>
             <properties>
-              <enabled value="false"/>
+              <enabled value="true"/>
             </properties>
+            <clientProperties>
+              <terminateEditOnFocusLost class="java.lang.Boolean" value="false"/>
+            </clientProperties>
           </component>
         </children>
       </scrollpane>

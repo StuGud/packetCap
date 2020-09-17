@@ -10,8 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 发送请求，并抓取响应
+ */
 public class RequestSender {
-    String url;
+
 
     public enum RequestMethod {
         GET,POST,HEAD,OPTIONS,PUT,DELETE,TRACE
@@ -167,13 +170,5 @@ public class RequestSender {
             requestMethodList.add(requestMethod.toString());
         }
         return requestMethodList;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 }

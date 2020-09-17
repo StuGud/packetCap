@@ -60,8 +60,8 @@ public class Pcap {
             @Override
             public void mouseClicked(MouseEvent e) {
 
+                int selectedRow = listTable.getSelectedRow();
                 if (e.getClickCount() == 2) {
-                    int selectedRow = listTable.getSelectedRow();
                     int value = (int) tableModel4lt.getValueAt(selectedRow, 0);
                     //显示packet详情
                     Packet packet = (Packet) loop.getPacketMap().get(value);
@@ -87,7 +87,14 @@ public class Pcap {
         }
 
         final String[] columnNames1 = {"NO", "Time", "Source", "Destination", "Protocol", "Length", "Info"};
-        tableModel4lt = new DefaultTableModel(null, columnNames1);
+        //String[][] data = {{"1", "2"}};
+        tableModel4lt = new DefaultTableModel(null, columnNames1) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+
+            ;
+        };
         listTable.setModel(tableModel4lt);
 
 //        final String[] columnNames2 = {"type", "content"};
@@ -140,7 +147,8 @@ public class Pcap {
         jScrollPane1 = new JScrollPane();
         jPanel.add(jScrollPane1, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         listTable = new JTable();
-        listTable.setEnabled(false);
+        listTable.setEnabled(true);
+        listTable.putClientProperty("terminateEditOnFocusLost", Boolean.FALSE);
         jScrollPane1.setViewportView(listTable);
         jScrollPane2 = new JScrollPane();
         jPanel.add(jScrollPane2, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));

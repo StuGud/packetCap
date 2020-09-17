@@ -131,6 +131,7 @@ public class Loop {
                   if(list.size()!=0)
                   {
                       Pcap.tableModel4lt.addRow(list.toArray());
+//                      Pcap.tableModel4lt.fireTableDataChanged();
                       packetMap.add(packetKey,packet);
                       packetKey++;
                   }
