@@ -1,10 +1,16 @@
 package com.gud.job;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.pcap4j.core.BpfProgram.BpfCompileMode;
 import org.pcap4j.core.NotOpenException;
 import org.pcap4j.core.PacketListener;
@@ -22,6 +28,7 @@ import org.pcap4j.packet.namednumber.EtherType;
 import org.pcap4j.util.ByteArrays;
 import org.pcap4j.util.MacAddress;
 import org.pcap4j.util.NifSelector;
+import sun.applet.Main;
 
 public class SendArpRequest {
 
@@ -37,18 +44,22 @@ public class SendArpRequest {
     // 发送 ARP 请求的源 MAC地址, 需填写正确, 否则接收不到 ARP 响应, 格式为: "-" 或 ":" 分隔开
     // D0-C6-37-3E-7A-fB, d0-c6-37-3e-7a-fb, d0:c6:37:3e:7a:fb 均可, 不区分大小写
     private static final MacAddress SRC_MAC_ADDR = MacAddress.getByName("26-DB-CA-BD-FB-4B");
-    private static final MacAddress DST_MAC_ADDR=MacAddress.getByName("60-14-B3-BB-C6-41");
+    private static final MacAddress DST_MAC_ADDR=MacAddress.getByName("a4-83-e7-88-35-6b");
 
     // 响应的 MAC 地址IP：192.168.1.104 | MAC：60-14-B3-BB-C6-41 | 无线连接
     private static MacAddress resolvedAddr;
 
     private SendArpRequest() {}
 
+    public static void get_ip_mac(){
+
+    }
+
     public static void main(String[] args) throws PcapNativeException, NotOpenException {
         // 源 IP 地址, 需填写正确
         String strSrcIpAddress = "192.168.1.1"; // for InetAddress.getByName()
         // 目的 IP 地址, 需填写正确
-        String strDstIpAddress = "192.168.1.104"; // for InetAddress.getByName()
+        String strDstIpAddress = "192.168.1.106"; // for InetAddress.getByName()
 
         System.out.println(COUNT_KEY + ": " + COUNT);
         System.out.println(READ_TIMEOUT_KEY + ": " + READ_TIMEOUT);

@@ -5,10 +5,8 @@ import com.sun.jna.Platform;
 import org.pcap4j.core.*;
 import org.pcap4j.packet.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Loop {
     // 设置 COUNT 常量，代表本次捕获数据包的数目，其中 -1 代表一直捕获
@@ -26,16 +24,16 @@ public class Loop {
     private PcapNetworkInterface nif;
     private Class<?> packetType;
 
-    public Map<Integer, Packet> getPacketMap() {
+    public Vector getPacketMap() {
         return packetMap;
     }
 
-    public void setPacketMap(Map<Integer, Packet> packetMap) {
+    public void setPacketMap(Vector packetMap) {
         this.packetMap = packetMap;
     }
 
     private int packetKey=0;
-    private Map<Integer,Packet> packetMap;
+    private Vector packetMap;
 
     public List<PcapNetworkInterface> getAllDevs(){
         List<PcapNetworkInterface> allDevs = null;
@@ -52,7 +50,7 @@ public class Loop {
      * 需要先setNif()，指定网卡
      */
     public void cap() throws PcapNativeException, NotOpenException {
-
+        packetMap=new Vector();
         // 打开网卡，其中 PromiscuousMode 为网卡是否选择混杂模式（注：交换环境下混杂模式无效，只会侦听本广播网段的数据包）
         // 其中 PcapHandle 对象指的是对网卡的一系列操作，且 一个 PcapHandle 对象对应抓一个网卡的报文
         // 所以要捕获多网卡就要设置多个 PcapHandle，这就为同时进行多个抓包提供了可能
@@ -79,7 +77,7 @@ public class Loop {
     PacketListener listener = new PacketListener() {
               @Override
               public void gotPacket(Packet packet) {
-                  System.out.println("发现敌情");
+//                  System.out.println("发现敌情");
                   List list=new ArrayList();
                   if(packet.contains(ArpPacket.class))
                   {
@@ -133,7 +131,7 @@ public class Loop {
                   if(list.size()!=0)
                   {
                       Pcap.tableModel4lt.addRow(list.toArray());
-                      packetMap.put(packetKey,packet);
+                      packetMap.add(packetKey,packet);
                       packetKey++;
                   }
                   }
@@ -164,7 +162,6 @@ public class Loop {
     private PacketListener getListener(){
         return packet -> {
             // 抓到报文走这里...
-            packetMap.put(packetKey,packet);
             packetKey++;
         };
     }
@@ -193,7 +190,7 @@ public class Loop {
     }
 
     public List<String> getPacketTypes() {
-        return Arrays.asList("All","IPv4","TCP","UDP","Http","ARP");
+        return Arrays.asList("All","IPv4","TCP","UDP","Http","ARP","DNS");
     }
 
     public void setPacketType(String packetTypeStr) {
