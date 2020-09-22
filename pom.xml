@@ -8,6 +8,15 @@
     <artifactId>packetCap</artifactId>
     <version>1.0-SNAPSHOT</version>
     <build>
+        <resources>
+            <!-- mapper.xml文件在java目录下 -->
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -21,7 +30,11 @@
     </build>
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.pcap4j/pcap4j-core -->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.httpcomponents</groupId>-->
+<!--            <artifactId>httpclient</artifactId>-->
+<!--            <version>4.5.12</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.pcap4j</groupId>
             <artifactId>pcap4j-core</artifactId>

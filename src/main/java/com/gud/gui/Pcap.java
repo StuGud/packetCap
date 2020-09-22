@@ -34,9 +34,6 @@ public class Pcap {
 
     Thread thread = null;
 
-    public JPanel getjPanel() {
-        return pcapPanel;
-    }
 
     public Pcap() {
         init();
