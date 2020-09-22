@@ -1,13 +1,9 @@
 package com.gud.job;
 
-import org.apache.http.HttpStatus;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.swing.text.DocumentFilter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -155,15 +151,14 @@ public class RequestSender {
 
             connection.connect();
 
-            responseStr += "======== response ========";
+            responseStr += "======== response head ========\n\n";
             responseStr += parseHttpStatusCode(connection.getResponseCode());
-            responseStr += "======== response ========";
+
+            responseStr += "======== response body ========\n\n";
             responseStr += getResponseStr(connection);
-            responseStr += "======== response ========";
-            responseStr += connection.getResponseMessage();
 
             connection.disconnect();
-        } catch (ConnectException connectException){
+        } catch (ConnectException connectException) {
             responseStr += "连接失败";
         } catch (ProtocolException e) {
             e.printStackTrace();
@@ -171,7 +166,7 @@ public class RequestSender {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             return responseStr;
         }
     }
@@ -195,7 +190,7 @@ public class RequestSender {
                     connection.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+                //System.out.println(line);
                 content += "\n" + line;
             }
             reader.close();
@@ -216,12 +211,13 @@ public class RequestSender {
     private String parseHttpStatusCode(int statusCode) {
         String detail = "";
 
+        detail += "status code: " + statusCode+"\n";
         Element elementById = xmlDocument.getElementById("c" + statusCode);
         Element message = (Element) elementById.getElementsByTagName("message").item(0);
-        detail += "message: " + message.getFirstChild().getNodeValue();
-        detail += "\n";
+        detail += "message: " + message.getFirstChild().getNodeValue()+"\n";
         Element description = (Element) elementById.getElementsByTagName("description").item(0);
         detail += "description: " + description.getFirstChild().getNodeValue();
+        detail += "\n\n";
 
         return detail;
     }
