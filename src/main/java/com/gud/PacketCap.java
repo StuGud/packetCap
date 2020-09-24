@@ -61,8 +61,6 @@ public class PacketCap extends JFrame {
         menu.add(arpAttackMenuItem);
         mb.add(menu);
         mb.setVisible(true);
-
-
     }
 
     public static void main(String[] args) {
