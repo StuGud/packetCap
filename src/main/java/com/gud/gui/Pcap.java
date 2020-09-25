@@ -34,6 +34,10 @@ public class Pcap {
 
     Thread thread = null;
 
+    public Loop getLoop() {
+        return loop;
+    }
+
     public JPanel getPcapPanel() {
         return pcapPanel;
     }

@@ -161,10 +161,13 @@ public class RequestSender {
         } catch (ConnectException connectException) {
             responseStr += "连接失败";
         } catch (ProtocolException e) {
+            System.out.println("ProtocolException");
             e.printStackTrace();
         } catch (MalformedURLException e) {
+            System.out.println("MalformedURLException");
             e.printStackTrace();
         } catch (IOException e) {
+            System.out.println("IOException");
             e.printStackTrace();
         } finally {
             return responseStr;
@@ -183,20 +186,18 @@ public class RequestSender {
 //
 //    }
 
-    private String getResponseStr(HttpURLConnection connection) {
+    private String getResponseStr(HttpURLConnection connection) throws IOException {
         String content = "";
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    connection.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                //System.out.println(line);
-                content += "\n" + line;
-            }
-            reader.close();
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(
+                connection.getInputStream()));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            //System.out.println(line);
+            content += "\n" + line;
         }
+        reader.close();
+
         return content;
     }
 
@@ -211,10 +212,10 @@ public class RequestSender {
     private String parseHttpStatusCode(int statusCode) {
         String detail = "";
 
-        detail += "status code: " + statusCode+"\n";
+        detail += "status code: " + statusCode + "\n";
         Element elementById = xmlDocument.getElementById("c" + statusCode);
         Element message = (Element) elementById.getElementsByTagName("message").item(0);
-        detail += "message: " + message.getFirstChild().getNodeValue()+"\n";
+        detail += "message: " + message.getFirstChild().getNodeValue() + "\n";
         Element description = (Element) elementById.getElementsByTagName("description").item(0);
         detail += "description: " + description.getFirstChild().getNodeValue();
         detail += "\n\n";

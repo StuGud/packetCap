@@ -135,8 +135,6 @@ public class Loop {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-
     }
 
     public void clear() {

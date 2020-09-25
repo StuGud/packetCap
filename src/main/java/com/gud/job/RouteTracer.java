@@ -3,8 +3,6 @@ package com.gud.job;
 import org.pcap4j.core.*;
 import org.pcap4j.packet.*;
 import org.pcap4j.packet.namednumber.*;
-import org.pcap4j.util.IcmpV4Helper;
-import org.pcap4j.util.IpV4Helper;
 import org.pcap4j.util.MacAddress;
 import org.pcap4j.util.NifSelector;
 
@@ -14,37 +12,41 @@ import java.io.InputStreamReader;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
  * 问题分析：
- * Mac地址
- * sendPacket没发出去
- *
  */
 
 /**
  * ICMP    type:8 code:0 => Echo请求
  */
+
+//改 srcAddress以及desMac
 public class RouteTracer {
 
-    //网关 MAC    寝室： 20:6b:e7:64:13:9d   校园网：00:00:5e:00:01:01
-    private static MacAddress dstMacAddress = MacAddress.getByName("20:6b:e7:64:13:9d");
+    //网关 MAC    寝室： 20:6b:e7:64:13:9d   校园网：00:00:5e:00:01:01   手机：f2:18:98:6e:7d:64
+    private static MacAddress dstMacAddress = MacAddress.getByName("f2:18:98:6e:7d:64");
     private static MacAddress srcMacAddress = MacAddress.getByName("a4:83:e7:88:35:6b");
     //最多的跳数
-    final int N=30;
+    final int N = 30;
+    long[] intervalTime =new long[N];
+
+    private List<Long> startTime = new ArrayList<>();
 
     private RouteTracer() {
     }
 
     public void traceRoute(String targetAddress) throws PcapNativeException, NotOpenException, InterruptedException {
-        Inet4Address targetAddr=null;
+        Inet4Address targetAddr = null;
         Inet4Address srcAddr = null;
         try {
-             targetAddr = (Inet4Address) InetAddress.getByName(targetAddress);
-             srcAddr = (Inet4Address) InetAddress.getLocalHost();
-             srcAddr = (Inet4Address) InetAddress.getByName("192.168.1.106");
+            targetAddr = (Inet4Address) InetAddress.getByName(targetAddress);
+            //srcAddr = (Inet4Address) InetAddress.getLocalHost();
+           srcAddr = (Inet4Address) InetAddress.getByName("172.20.10.18");
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
@@ -84,11 +86,15 @@ public class RouteTracer {
 //                BpfProgram.BpfCompileMode.OPTIMIZE);
 
         // 不同的 type 对应不同的 Builder, 用于控制 icmp 的内层
-        final Packet.Builder icmpV4Echo = new IcmpV4EchoPacket.Builder();
+        IcmpV4EchoPacket.Builder icmpV4Echo = new IcmpV4EchoPacket.Builder();
+
 
         // 生成 icmp 外层的 Builder, 然后传入内层的 Builder
         IcmpV4CommonPacket.Builder icmpV4b = new IcmpV4CommonPacket.Builder();
-        icmpV4b.type(type).code(code).payloadBuilder(icmpV4Echo).correctChecksumAtBuild(true);
+        icmpV4b
+                .type(type)
+                .code(code)
+                .payloadBuilder(icmpV4Echo);
 
         // 与上面同理, 生成 ipv4 的 Builder, 然后传入 icmp 的 Builder
         IpV4Packet.Builder ipv4b = new IpV4Packet.Builder();
@@ -114,19 +120,24 @@ public class RouteTracer {
         final PacketListener listener =
                 packet -> { // 回调逻辑 -> 确定数据包内部详细 -> 回复 icmp
                     // 如果收到的报文为 icmp 回送请求或回送回答报文
-                    if (packet.contains(IcmpV4EchoReplyPacket.class)) {
-                        if(packet.get(IpV4Packet.class).getHeader().getDstAddr()== finalSrcAddr){
-                            System.out.println("ICMP=================");
-                            System.out.println(packet);
-                            //计算时延
-                            System.out.println(packet.get(IpV4Packet.class).getHeader().getDstAddr());
-                            System.out.println(packet.get(IpV4Packet.class).getHeader().getSrcAddr());
-                            System.out.println(packet.get(EthernetPacket.class).getHeader().getDstAddr());
-                            System.out.println(packet.get(EthernetPacket.class).getHeader().getSrcAddr());
+                    if (packet.contains(IcmpV4CommonPacket.class) && packet.get(IpV4Packet.class).getHeader().getDstAddr().equals(finalSrcAddr)) {
+                        //System.out.println("ICMP=================");
+                        //System.out.println(packet);
+                        //计算时延
+                        if(packet.contains(IcmpV4TimeExceededPacket.class)){
+                            byte[] rawData = packet.getRawData();
+                            System.out.print(rawData[67]+"  经过:"+packet.get(IpV4Packet.class).getHeader().getSrcAddr());
+                            intervalTime[rawData[67]-1]=System.currentTimeMillis()-startTime.get(rawData[67]-1);
+                            System.out.println("  时延："+ intervalTime[rawData[67]-1]+"ms");
+                        }else if(packet.contains(IcmpV4EchoReplyPacket.class)){
+                            byte[] rawData = packet.getRawData();
+                            System.out.print(rawData[39]+"  到达终点:"+packet.get(IpV4Packet.class).getHeader().getSrcAddr());
+                            intervalTime[rawData[39]-1]=System.currentTimeMillis()-startTime.get(rawData[39]-1);
+                            System.out.println("  时延："+ intervalTime[rawData[39]-1]+"ms");
                         }
 
-
                     }
+
                 };
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -150,16 +161,27 @@ public class RouteTracer {
 
         for (int i = 1; i <= N; i++) {
             Thread.sleep(1000);
-            ipv4b.ttl((byte)i)
-                    .correctChecksumAtBuild(true) // 计算校验和
-                    .correctLengthAtBuild(true); // 计算长度;
+            icmpV4Echo.identifier((short) i);
+            icmpV4b.payloadBuilder(icmpV4Echo)
+                    .correctChecksumAtBuild(true);
+
+            ipv4b.ttl((byte) i)
+                    .correctChecksumAtBuild(true)
+                    .correctLengthAtBuild(true)
+                    .payloadBuilder(icmpV4b);
             eb.payloadBuilder(ipv4b);
             handle4send.sendPacket(eb.build());
-            handle4send.sendPacket(eb.build());
-            handle4send.sendPacket(eb.build());
-//            System.out.println(eb.build());
-            System.out.println("已发送echo"+i);
+            startTime.add(System.currentTimeMillis());
+            //System.out.println(eb.build());
+            //System.out.println("已发送echo" + i);
         }
+
+//        Thread.sleep(3000);
+//        for (int i = 0; i < N; i++) {
+//            if(intervalTime[i]==0){
+//                System.out.println();
+//            }
+//        }
 
 
 
@@ -172,7 +194,7 @@ public class RouteTracer {
     }
 
     public static void main(String[] args) throws PcapNativeException, NotOpenException, InterruptedException {
-        new RouteTracer().traceRoute("192.168.1.108");
+        new RouteTracer().traceRoute("www.baidu.com");
     }
 
     private static void block() {

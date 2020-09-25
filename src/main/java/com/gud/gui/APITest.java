@@ -24,6 +24,7 @@ public class APITest {
     private JPanel apiTestPanel;
     private JButton addMapButton;
     private JScrollPane scrollPane1;
+    private JButton clearButton;
 
     private DefaultTableModel tableModel4mt;
 
@@ -67,6 +68,12 @@ public class APITest {
             public void actionPerformed(ActionEvent e) {
                 String[] blankRow = {"", ""};
                 tableModel4mt.addRow(blankRow);
+            }
+        });
+        clearButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                tableModel4mt.setRowCount(0);
             }
         });
     }
@@ -139,6 +146,9 @@ public class APITest {
         responseTextArea = new JTextArea();
         responseTextArea.setText("");
         scrollPane2.setViewportView(responseTextArea);
+        clearButton = new JButton();
+        clearButton.setText("clear");
+        apiTestPanel.add(clearButton, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**
