@@ -7,6 +7,7 @@ import org.pcap4j.packet.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.LockSupport;
 
 public class Loop {
     // 设置 COUNT 常量，代表本次捕获数据包的数目，其中 -1 代表一直捕获
@@ -20,9 +21,10 @@ public class Loop {
     // 要捕获的最大数据包大小（以字节为单位）
     private static final String SNAPLEN_KEY = Loop.class.getName() + ".snaplen";
     private static final int SNAPLEN = Integer.getInteger(SNAPLEN_KEY, 65536); // [bytes]
+    public static int state;
 
     private PcapNetworkInterface nif;
-    private Class<?> packetType;
+    private Class packetType;
 
     public Vector getPacketMap() {
         return packetMap;
@@ -34,6 +36,7 @@ public class Loop {
 
     private int packetKey=0;
     private Vector packetMap;
+    public PcapHandle handle;
 
     public List<PcapNetworkInterface> getAllDevs(){
         List<PcapNetworkInterface> allDevs = null;
@@ -52,9 +55,9 @@ public class Loop {
     public void cap() throws PcapNativeException, NotOpenException {
         packetMap=new Vector();
         // 打开网卡，其中 PromiscuousMode 为网卡是否选择混杂模式（注：交换环境下混杂模式无效，只会侦听本广播网段的数据包）
-        // 其中 PcapHandle 对象指的是对网卡的一系列操作，且 一个 PcapHandle 对象对应抓一个网卡的报文
-        // 所以要捕获多网卡就要设置多个 PcapHandle，这就为同时进行多个抓包提供了可能
-        final PcapHandle handle = nif.openLive(SNAPLEN, PcapNetworkInterface.PromiscuousMode.PROMISCUOUS, READ_TIMEOUT);
+        // 其中 PcapHandle 对象指的是对网卡的一系列操作，且 一个 Pca的报文
+        //        // 所以要捕获多网卡就要设置多个 PcapHandle，这就为同时进行多个抓包提供了pHandle 对象对应抓一个网卡可能
+        handle = nif.openLive(SNAPLEN, PcapNetworkInterface.PromiscuousMode.PROMISCUOUS, READ_TIMEOUT);
 
         // 设置过滤器规则，为标准 BPF 规则表达式，如 args 为空则规则为 “”
         //String filter = args.length != 0 ? args[0] : "";
@@ -79,9 +82,11 @@ public class Loop {
               public void gotPacket(Packet packet) {
 //                  System.out.println("发现敌情");
                   List list=new ArrayList();
+                  list.add(packetKey);
+
                   if(packet.contains(ArpPacket.class))
                   {
-                      list.add(packetKey);
+
                       list.add("0.0.0");
                       list.add(packet.get(ArpPacket.class).getHeader().getSrcHardwareAddr().toString());
                       list.add(packet.get(ArpPacket.class).getHeader().getDstHardwareAddr().toString());
@@ -95,7 +100,7 @@ public class Loop {
                   }
                   else if(packet.contains(DnsPacket.class))
                   {
-                      list.add(packetKey);
+
                       list.add("0.0.0");
                       list.add(packet.get(IpV4Packet.class).getHeader().getSrcAddr().toString());
                       list.add(packet.get(IpV4Packet.class).getHeader().getDstAddr().toString());
@@ -105,7 +110,7 @@ public class Loop {
                               packet.get(DnsPacket.class).getHeader().getAnswers().toString());
                   }
                   else if(packet.contains(IpV4Packet.class)) {
-                      list.add(packetKey);
+
                       list.add("0.0.0");
                       list.add(packet.get(IpV4Packet.class).getHeader().getSrcAddr().toString());
                       list.add(packet.get(IpV4Packet.class).getHeader().getDstAddr().toString());
@@ -128,20 +133,30 @@ public class Loop {
 
 
                   }
-                  if(list.size()!=0)
-                  {
+                      if(list.size()<5)
+                      {
+                          list.add("");
+                          list.add("");
+                          list.add("");
+                          list.add("UnKonw");
+                          list.add("");
+                          list.add("");
+
+                      }
                       Pcap.tableModel4lt.addRow(list.toArray());
 //                      Pcap.tableModel4lt.fireTableDataChanged();
                       packetMap.add(packetKey,packet);
                       packetKey++;
                   }
-                  }
+
 
             };
 
         // 调用 loop 函数（还有许多其他捕获数据包的方法，日后再说）进行抓包，其中抓到的包则回调 listener 指向的回调函数
         try {
+            handle.setBlockingMode(PcapHandle.BlockingMode.NONBLOCKING);
             handle.loop(COUNT, listener);
+            
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

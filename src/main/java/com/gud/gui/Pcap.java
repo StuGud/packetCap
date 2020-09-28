@@ -16,6 +16,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.concurrent.locks.LockSupport;
 
 public class Pcap {
     private JPanel jPanel;
@@ -31,6 +32,7 @@ public class Pcap {
     public static DefaultTableModel tableModel4lt;
 
     private Loop loop;
+    private Thread t;
 
     public Pcap() {
         init();
@@ -41,19 +43,37 @@ public class Pcap {
                 //nifComboBox.getModel().getSelectedItem();
                 loop.setNif((String) nifComboBox.getModel().getSelectedItem());
                 loop.setPacketType((String) pacComboBox.getModel().getSelectedItem());
-                Thread t = new Thread() {
-                    public void run() {
-                        try {
-                            loop.cap();
-                        } catch (PcapNativeException pcapNativeException) {
-                            pcapNativeException.printStackTrace();
-                        } catch (NotOpenException notOpenException) {
-                            notOpenException.printStackTrace();
+                System.out.println(t.getState());
+
+                if (t.getState() == Thread.State.TERMINATED) {
+                    t = new Thread() {
+                        public void run() {
+                            try {
+                                loop.cap();
+                            } catch (PcapNativeException pcapNativeException) {
+                                pcapNativeException.printStackTrace();
+                            } catch (NotOpenException notOpenException) {
+                                notOpenException.printStackTrace();
+                            }
                         }
+                    };
+                }
+
+                if (t.getState() != Thread.State.RUNNABLE) {
+
+                    t.start();
+                    packetDetailsTextArea.setText("");
+                    start.setText("停止");
+                } else if (t.getState() == Thread.State.RUNNABLE) {
+                    try {
+                        loop.handle.breakLoop();
+                    } catch (NotOpenException notOpenException) {
+                        notOpenException.printStackTrace();
                     }
-                };
-                t.start();
-                packetDetailsTextArea.setText("");
+                    start.setText("开始");
+
+                }
+
             }
         });
         listTable.addMouseListener(new MouseAdapter() {
@@ -75,6 +95,17 @@ public class Pcap {
     private void init() {
 
         loop = new Loop();
+        t = new Thread() {
+            public void run() {
+                try {
+                    loop.cap();
+                } catch (PcapNativeException pcapNativeException) {
+                    pcapNativeException.printStackTrace();
+                } catch (NotOpenException notOpenException) {
+                    notOpenException.printStackTrace();
+                }
+            }
+        };
 
         List<PcapNetworkInterface> allDevs = loop.getAllDevs();
         for (int i = 0; i < allDevs.size(); i++) {
@@ -162,6 +193,7 @@ public class Pcap {
     public JComponent $$$getRootComponent$$$() {
         return jPanel;
     }
+
 }
 
 
