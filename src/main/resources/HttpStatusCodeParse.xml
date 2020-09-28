@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE status_codes [
+        <!ELEMENT status_codes (status_code+)>
+        <!ELEMENT status_code (message,description)>
+        <!ELEMENT message (#PCDATA)>
+        <!ELEMENT description (#PCDATA)>
+        <!ATTLIST status_code
+                code ID #REQUIRED>
+        ]>
+
+<status_codes>
+
+    <!--1xx: Information-->
+    <status_code code="c100">
+        <message>Continue</message>
+        <description>The server has received the request headers, and the client should proceed to send the request
+            body
+        </description>
+    </status_code>
+    <status_code code="c101">
+        <message>Switching Protocols</message>
+        <description>The requester has asked the server to switch protocols</description>
+    </status_code>
+    <status_code code="c102">
+        <message>Checkpoint</message>
+        <description>Used in the resumable requests proposal to resume aborted PUT or POST requests</description>
+    </status_code>
+
+    <!--2xx: Successful-->
+    <status_code code="c200">
+        <message>OK</message>
+        <description>The request is OK (this is the standard response for successful HTTP requests)</description>
+    </status_code>
+    <status_code code="c201">
+        <message>Created</message>
+        <description>The request has been fulfilled, and a new resource is created</description>
+    </status_code>
+    <status_code code="c202">
+        <message>Accepted</message>
+        <description>The request has been accepted for processing, but the processing has not been completed
+        </description>
+    </status_code>
+    <status_code code="c203">
+        <message>Non-Authoritative Information</message>
+        <description>The request has been successfully processed, but is returning information that may be from another
+            source
+        </description>
+    </status_code>
+    <status_code code="c204">
+        <message>No Content</message>
+        <description>The request has been successfully processed, but is not returning any content</description>
+    </status_code>
+    <status_code code="c205">
+        <message>Reset Content</message>
+        <description>The request has been successfully processed, but is not returning any content, and requires that
+            the requester reset the document view
+        </description>
+    </status_code>
+    <status_code code="c206">
+        <message>Partial Content</message>
+        <description>The server is delivering only part of the resource due to a range header sent by the client
+        </description>
+    </status_code>
+
+    <!--3xx: Redirection-->
+    <status_code code="c300">
+        <message>Multiple Choices</message>
+        <description>A link list. The user can select a link and go to that location. Maximum five addresses  </description>
+    </status_code>
+    <status_code code="c301">
+        <message>Moved Permanently</message>
+        <description>The requested page has moved to a new URL </description>
+    </status_code>
+    <status_code code="c302">
+        <message>Found</message>
+        <description>The requested page has moved temporarily to a new URL </description>
+    </status_code>
+    <status_code code="c303">
+        <message>See Other</message>
+        <description>The requested page can be found under a different URL</description>
+    </status_code>
+    <status_code code="c304">
+        <message>Not Modified</message>
+        <description>Indicates the requested page has not been modified since last requested</description>
+    </status_code>
+    <status_code code="c306">
+        <message>Switch Proxy</message>
+        <description>No longer used</description>
+    </status_code>
+    <status_code code="c307">
+        <message>Temporary Redirect</message>
+        <description>The requested page has moved temporarily to a new URL</description>
+    </status_code>
+    <status_code code="c308">
+        <message>Resume Incomplete</message>
+        <description>Used in the resumable requests proposal to resume aborted PUT or POST requests</description>
+    </status_code>
+
+    <!--4xx: Client Error-->
+    <status_code code="c400">
+        <message>Bad Request</message>
+        <description>The request cannot be fulfilled due to bad syntax</description>
+    </status_code>
+    <status_code code="c401">
+        <message>Unauthorized</message>
+        <description>The request was a legal request, but the server is refusing to respond to it. For use when authentication is possible but has failed or not yet been provided</description>
+    </status_code>
+    <status_code code="c402">
+        <message>Payment Required</message>
+        <description>Reserved for future use</description>
+    </status_code>
+    <status_code code="c403">
+        <message>Forbidden</message>
+        <description>The request was a legal request, but the server is refusing to respond to it</description>
+    </status_code>
+    <status_code code="c404">
+        <message>Not Found</message>
+        <description>The requested page could not be found but may be available again in the future</description>
+    </status_code>
+    <status_code code="c405">
+        <message>Method Not Allowed</message>
+        <description>A request was made of a page using a request method not supported by that page</description>
+    </status_code>
+    <status_code code="c406">
+        <message>Not Acceptable</message>
+        <description>The server can only generate a response that is not accepted by the client</description>
+    </status_code>
+    <status_code code="c407">
+        <message>Proxy Authentication Required</message>
+        <description>The client must first authenticate itself with the proxy</description>
+    </status_code>
+    <status_code code="c408">
+        <message>Request Timeout</message>
+        <description>The server timed out waiting for the request</description>
+    </status_code>
+    <status_code code="c409">
+        <message>Conflict</message>
+        <description>The request could not be completed because of a conflict in the request</description>
+    </status_code>
+    <status_code code="c410">
+        <message>Gone</message>
+        <description>The requested page is no longer available</description>
+    </status_code>
+    <status_code code="c411">
+        <message>Length Required</message>
+        <description>The "Content-Length" is not defined. The server will not accept the request without it </description>
+    </status_code>
+    <status_code code="c412">
+        <message>Precondition Failed</message>
+        <description>The precondition given in the request evaluated to false by the server</description>
+    </status_code>
+    <status_code code="c413">
+        <message>Request Entity Too Large</message>
+        <description>The server will not accept the request, because the request entity is too large</description>
+    </status_code>
+    <status_code code="c414">
+        <message>Request-URI Too Long</message>
+        <description>The server will not accept the request, because the URL is too long. Occurs when you convert a POST request to a GET request with a long query information </description>
+    </status_code>
+    <status_code code="c415">
+        <message>Unsupported Media Type</message>
+        <description>The server will not accept the request, because the media type is not supported </description>
+    </status_code>
+    <status_code code="c416">
+        <message>Requested Range Not Satisfiable</message>
+        <description>The client has asked for a portion of the file, but the server cannot supply that portion</description>
+    </status_code>
+    <status_code code="c417">
+        <message>Expectation Failed</message>
+        <description>The server cannot meet the requirements of the Expect request-header field</description>
+    </status_code>
+
+    <!--5xx: Server Error-->
+    <status_code code="c500">
+        <message>Internal Server Error</message>
+        <description>A generic error message, given when no more specific message is suitable</description>
+    </status_code>
+    <status_code code="c501">
+        <message>Not Implemented</message>
+        <description>The server either does not recognize the request method, or it lacks the ability to fulfill the request</description>
+    </status_code>
+    <status_code code="c502">
+        <message>Bad Gateway</message>
+        <description>The server was acting as a gateway or proxy and received an invalid response from the upstream server</description>
+    </status_code>
+    <status_code code="c503">
+        <message>Service Unavailable</message>
+        <description>The server is currently unavailable (overloaded or down)</description>
+    </status_code>
+    <status_code code="c504">
+        <message>Gateway Timeout</message>
+        <description>The server was acting as a gateway or proxy and did not receive a timely response from the upstream server</description>
+    </status_code>
+    <status_code code="c505">
+        <message>HTTP Version Not Supported</message>
+        <description>The server does not support the HTTP protocol version used in the request</description>
+    </status_code>
+    <status_code code="c511">
+        <message>Network Authentication Required</message>
+        <description>The client needs to authenticate to gain network access</description>
+    </status_code>
+
+
+</status_codes>

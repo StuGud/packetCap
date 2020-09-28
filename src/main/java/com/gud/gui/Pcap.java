@@ -16,7 +16,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import java.util.concurrent.locks.LockSupport;
 
 public class Pcap {
     private JPanel jPanel;
@@ -34,12 +33,30 @@ public class Pcap {
     private Loop loop;
     private Thread t;
 
+    Thread thread = null;
+
+    public Loop getLoop() {
+        return loop;
+    }
+
+    public JPanel getPcapPanel() {
+        return pcapPanel;
+    }
+
+    public void setPcapPanel(JPanel pcapPanel) {
+        this.pcapPanel = pcapPanel;
+    }
+
     public Pcap() {
         init();
 
         start.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 //获取用户选择的网卡信息、包信息；刷新数据包列表；清空右侧详情
+                loop.clear();
+                packetDetailsTextArea.setText("");
+                tableModel4lt.setRowCount(1);
+
                 //nifComboBox.getModel().getSelectedItem();
                 loop.setNif((String) nifComboBox.getModel().getSelectedItem());
                 loop.setPacketType((String) pacComboBox.getModel().getSelectedItem());
@@ -193,7 +210,6 @@ public class Pcap {
     public JComponent $$$getRootComponent$$$() {
         return jPanel;
     }
-
 }
 
 
