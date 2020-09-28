@@ -40,16 +40,7 @@ public class Loop {
     private int packetKey = 0;
     private Vector packetVector;
 
-    public List<PcapNetworkInterface> getAllDevs() {
-        List<PcapNetworkInterface> allDevs = null;
-        try {
-            allDevs = Pcaps.findAllDevs();
-        } catch (PcapNativeException pcapNativeException) {
-            System.out.println("查找网卡出现问题");
-            pcapNativeException.printStackTrace();
-        }
-        return allDevs;
-    }
+
 
     /**
      * 需要先setNif()，指定网卡

@@ -1,6 +1,7 @@
 package com.gud.gui;
 
 import com.gud.job.Loop;
+import com.gud.job.PcapUtils;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import org.pcap4j.core.NotOpenException;
@@ -94,7 +95,7 @@ public class Pcap {
 
         loop = new Loop();
 
-        List<PcapNetworkInterface> allDevs = loop.getAllDevs();
+        List<PcapNetworkInterface> allDevs = PcapUtils.getAllDevs();
         for (int i = 0; i < allDevs.size(); i++) {
             nifComboBox.addItem(allDevs.get(i).getName());
         }
