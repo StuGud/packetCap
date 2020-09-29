@@ -1,6 +1,7 @@
 package com.gud.gui;
 
 import com.gud.job.Loop;
+import com.gud.job.PcapUtils;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import org.pcap4j.core.NotOpenException;
@@ -18,7 +19,7 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 
 public class Pcap {
-    private JPanel jPanel;
+    private JPanel pcapPanel;
     private JButton start;
     private JTable listTable;
     private JTable detailTable;
@@ -61,6 +62,7 @@ public class Pcap {
                 loop.setNif((String) nifComboBox.getModel().getSelectedItem());
                 loop.setPacketType((String) pacComboBox.getModel().getSelectedItem());
                 System.out.println(t.getState());
+                loop.setFilter("tcp");
 
                 if (t.getState() == Thread.State.TERMINATED) {
                     t = new Thread() {
@@ -101,7 +103,7 @@ public class Pcap {
                 if (e.getClickCount() == 2) {
                     int value = (int) tableModel4lt.getValueAt(selectedRow, 0);
                     //显示packet详情
-                    Packet packet = (Packet) loop.getPacketMap().get(value);
+                    Packet packet = (Packet) loop.getPacketVector().get(value);
                     //
                     packetDetailsTextArea.setText(String.valueOf(packet));
                 }
@@ -124,7 +126,7 @@ public class Pcap {
             }
         };
 
-        List<PcapNetworkInterface> allDevs = loop.getAllDevs();
+        List<PcapNetworkInterface> allDevs = PcapUtils.getAllDevs();
         for (int i = 0; i < allDevs.size(); i++) {
             nifComboBox.addItem(allDevs.get(i).getName());
         }
@@ -134,7 +136,7 @@ public class Pcap {
             pacComboBox.addItem(packetType);
         }
 
-        final String[] columnNames1 = {"NO", "Time", "Source", "Destination", "Protocol", "Length", "Info"};
+        final String[] columnNames1 = {"NO", "Source", "Destination", "Protocol", "Length", "Info"};
         //String[][] data = {{"1", "2"}};
         tableModel4lt = new DefaultTableModel(null, columnNames1) {
             public boolean isCellEditable(int row, int column) {
@@ -152,7 +154,7 @@ public class Pcap {
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Pcap");
-        frame.setContentPane(new Pcap().jPanel);
+        frame.setContentPane(new Pcap().pcapPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
@@ -183,23 +185,23 @@ public class Pcap {
      * @noinspection ALL
      */
     private void $$$setupUI$$$() {
-        jPanel = new JPanel();
-        jPanel.setLayout(new GridLayoutManager(3, 3, new Insets(0, 0, 0, 0), -1, -1));
+        pcapPanel = new JPanel();
+        pcapPanel.setLayout(new GridLayoutManager(3, 3, new Insets(0, 0, 0, 0), -1, -1));
         nifComboBox = new JComboBox();
-        jPanel.add(nifComboBox, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        pcapPanel.add(nifComboBox, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         start = new JButton();
         start.setText("开始");
-        jPanel.add(start, new GridConstraints(0, 2, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        pcapPanel.add(start, new GridConstraints(0, 2, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         pacComboBox = new JComboBox();
-        jPanel.add(pacComboBox, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        pcapPanel.add(pacComboBox, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         jScrollPane1 = new JScrollPane();
-        jPanel.add(jScrollPane1, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        pcapPanel.add(jScrollPane1, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         listTable = new JTable();
         listTable.setEnabled(true);
         listTable.putClientProperty("terminateEditOnFocusLost", Boolean.FALSE);
         jScrollPane1.setViewportView(listTable);
         jScrollPane2 = new JScrollPane();
-        jPanel.add(jScrollPane2, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        pcapPanel.add(jScrollPane2, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         packetDetailsTextArea = new JTextArea();
         jScrollPane2.setViewportView(packetDetailsTextArea);
     }
@@ -208,7 +210,7 @@ public class Pcap {
      * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
-        return jPanel;
+        return pcapPanel;
     }
 }
 

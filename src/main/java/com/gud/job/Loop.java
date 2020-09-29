@@ -24,14 +24,30 @@ public class Loop {
     private PcapNetworkInterface nif;
     private Class packetType;
 
-    PcapHandle handle;
+    public  PcapHandle handle;
 
-    public Vector getPacketMap() {
-        return packetMap;
+
+    private String filter="";
+    public String getFilter() {
+        return filter;
     }
 
-    public void setPacketMap(Vector packetMap) {
-        this.packetMap = packetMap;
+    public void setFilter(String filter) {
+        this.filter = filter;
+    }
+
+
+
+    public Loop() {
+        packetVector = new Vector();
+    }
+
+    public Vector getPacketVector() {
+        return packetVector;
+    }
+
+    public void setPacketVector(Vector packetVector) {
+        this.packetVector = packetVector;
     }
 
     private int packetKey = 0;
@@ -52,7 +68,6 @@ public class Loop {
      * 需要先setNif()，指定网卡
      */
     public void cap() throws PcapNativeException, NotOpenException {
-        packetMap=new Vector();
         // 打开网卡，其中 PromiscuousMode 为网卡是否选择混杂模式（注：交换环境下混杂模式无效，只会侦听本广播网段的数据包）
         // 其中 PcapHandle 对象指的是对网卡的一系列操作，且 一个 PcapHandle 对象对应抓一个网卡的报文
         // 所以要捕获多网卡就要设置多个 PcapHandle，这就为同时进行多个抓包提供了可能
@@ -61,7 +76,6 @@ public class Loop {
 
         // 设置过滤器规则，为标准 BPF 规则表达式，如 args 为空则规则为 “”
         //String filter = args.length != 0 ? args[0] : "";
-        String filter = "";
         // 设置网卡过滤器
         if (filter.length() != 0) {
             handle.setFilter(filter, BpfProgram.BpfCompileMode.OPTIMIZE);
@@ -87,7 +101,7 @@ public class Loop {
                   if(packet.contains(ArpPacket.class))
                   {
 
-                      list.add("0.0.0");
+
                       list.add(packet.get(ArpPacket.class).getHeader().getSrcHardwareAddr().toString());
                       list.add(packet.get(ArpPacket.class).getHeader().getDstHardwareAddr().toString());
                       list.add("ARP");
@@ -101,7 +115,7 @@ public class Loop {
                   else if(packet.contains(DnsPacket.class))
                   {
 
-                      list.add("0.0.0");
+
                       list.add(packet.get(IpV4Packet.class).getHeader().getSrcAddr().toString());
                       list.add(packet.get(IpV4Packet.class).getHeader().getDstAddr().toString());
                       list.add("DNS");
@@ -111,7 +125,7 @@ public class Loop {
                   }
                   else if(packet.contains(IpV4Packet.class)) {
 
-                      list.add("0.0.0");
+
                       list.add(packet.get(IpV4Packet.class).getHeader().getSrcAddr().toString());
                       list.add(packet.get(IpV4Packet.class).getHeader().getDstAddr().toString());
                       list.add(packet.get(IpV4Packet.class).getHeader().getProtocol().toString());
@@ -133,35 +147,46 @@ public class Loop {
 
 
                 }
-                if (list.size() != 0&&packet.contains(packetType)) {
+                if (packet.contains(packetType)) {
+
                     Pcap.tableModel4lt.addRow(list.toArray());
 //                      Pcap.tableModel4lt.fireTableDataChanged();
-                      packetMap.add(packetKey,packet);
-                      packetKey++;
-                  }
-                  }
+                    packetVector.add(packetKey, packet);
+                    packetKey++;
+                }
+            }
 
-            };
-
+        };
         // 调用 loop 函数（还有许多其他捕获数据包的方法，日后再说）进行抓包，其中抓到的包则回调 listener 指向的回调函数
         try {
             handle.loop(COUNT, listener);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        // PcapStat 对象为本次抓包的统计信息
-        PcapStat ps = handle.getStats();
-        System.out.println("ps_recv: " + ps.getNumPacketsReceived());
-        System.out.println("ps_drop: " + ps.getNumPacketsDropped());
-        System.out.println("ps_ifdrop: " + ps.getNumPacketsDroppedByIf());
-        if (Platform.isWindows()) {
-            System.out.println("bs_capt: " + ps.getNumPacketsCaptured());
-        }
-
-        // 关闭网卡
-        handle.close();
     }
+
+    public void clear() {
+        if (handle!=null&&handle.isOpen()){
+            PcapStat ps = null;
+            try {
+                handle.breakLoop();
+                // PcapStat 对象为本次抓包的统计信息
+                ps = handle.getStats();
+            } catch (PcapNativeException e) {
+                e.printStackTrace();
+            } catch (NotOpenException e) {
+                e.printStackTrace();
+            }
+            System.out.println("ps_recv: " + ps.getNumPacketsReceived());
+            System.out.println("ps_drop: " + ps.getNumPacketsDropped());
+            System.out.println("ps_ifdrop: " + ps.getNumPacketsDroppedByIf());
+            if (Platform.isWindows()) {
+                System.out.println("bs_capt: " + ps.getNumPacketsCaptured());
+            }
+
+            // 关闭网卡
+            handle.close();
+        }
 
         packetKey = 0;
         packetVector.clear();
@@ -177,7 +202,7 @@ public class Loop {
 
     public void setNif(String nif) {
         try {
-            System.out.println("select: "+nif);
+            System.out.println("select: " + nif);
             this.nif = Pcaps.getDevByName(nif);
         } catch (PcapNativeException e) {
             System.out.println("获取特定网卡失败");
@@ -186,30 +211,30 @@ public class Loop {
     }
 
     public List<String> getPacketTypes() {
-        return Arrays.asList("All","IPv4","TCP","UDP","Http","ARP","DNS");
+        return Arrays.asList("All", "IPv4", "TCP", "UDP", "Http", "ARP", "DNS");
     }
 
     public void setPacketType(String packetTypeStr) {
-        System.out.println("select: "+packetTypeStr);
-        switch (packetTypeStr){
+        System.out.println("select: " + packetTypeStr);
+        switch (packetTypeStr) {
             case "IPv4":
-                packetType= IpV4Packet.class;
+                packetType = IpV4Packet.class;
                 break;
             case "TCP":
-                packetType= TcpPacket.class;
+                packetType = TcpPacket.class;
                 break;
             case "UDP":
-                packetType= UdpPacket.class;
+                packetType = UdpPacket.class;
                 break;
             case "Http":
                 //手动识别
-                packetType= TcpPacket.class;
+                packetType = TcpPacket.class;
                 break;
             case "ARP":
-                packetType= ArpPacket.class;
+                packetType = ArpPacket.class;
                 break;
             case "All":
-                packetType= Packet.class;
+                packetType = Packet.class;
                 break;
             default:
                 break;
