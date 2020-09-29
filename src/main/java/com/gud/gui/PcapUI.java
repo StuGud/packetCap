@@ -18,27 +18,22 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
-public class Pcap {
+public class PcapUI {
     private JPanel pcapPanel;
     private JButton start;
     private JTable listTable;
-    private JTable detailTable;
     private JComboBox nifComboBox;
     private JComboBox pacComboBox;
     private JScrollPane jScrollPane1;
     private JScrollPane jScrollPane2;
     private JTextArea packetDetailsTextArea;
+    private JTextField filterTextField;
+    private JButton pauseBtn;
 
     public static DefaultTableModel tableModel4lt;
 
     private Loop loop;
     private Thread t;
-
-    Thread thread = null;
-
-    public Loop getLoop() {
-        return loop;
-    }
 
     public JPanel getPcapPanel() {
         return pcapPanel;
@@ -48,7 +43,7 @@ public class Pcap {
         this.pcapPanel = pcapPanel;
     }
 
-    public Pcap() {
+    public PcapUI() {
         init();
 
         start.addActionListener(new ActionListener() {
@@ -58,41 +53,24 @@ public class Pcap {
                 packetDetailsTextArea.setText("");
                 tableModel4lt.setRowCount(1);
 
-                //nifComboBox.getModel().getSelectedItem();
                 loop.setNif((String) nifComboBox.getModel().getSelectedItem());
                 loop.setPacketType((String) pacComboBox.getModel().getSelectedItem());
-                System.out.println(t.getState());
-                loop.setFilter("tcp");
+                loop.setFilter(filterTextField.getText());
 
-                if (t.getState() == Thread.State.TERMINATED) {
-                    t = new Thread() {
-                        public void run() {
-                            try {
-                                loop.cap();
-                            } catch (PcapNativeException pcapNativeException) {
-                                pcapNativeException.printStackTrace();
-                            } catch (NotOpenException notOpenException) {
-                                notOpenException.printStackTrace();
-                            }
+                t = new Thread() {
+                    public void run() {
+                        try {
+                            loop.cap();
+                        } catch (PcapNativeException pcapNativeException) {
+                            pcapNativeException.printStackTrace();
+                        } catch (NotOpenException notOpenException) {
+                            notOpenException.printStackTrace();
                         }
-                    };
-                }
-
-                if (t.getState() != Thread.State.RUNNABLE) {
-
-                    t.start();
-                    packetDetailsTextArea.setText("");
-                    start.setText("停止");
-                } else if (t.getState() == Thread.State.RUNNABLE) {
-                    try {
-                        loop.handle.breakLoop();
-                    } catch (NotOpenException notOpenException) {
-                        notOpenException.printStackTrace();
                     }
-                    start.setText("开始");
+                };
 
-                }
-
+                t.start();
+                packetDetailsTextArea.setText("");
             }
         });
         listTable.addMouseListener(new MouseAdapter() {
@@ -107,6 +85,12 @@ public class Pcap {
                     //
                     packetDetailsTextArea.setText(String.valueOf(packet));
                 }
+            }
+        });
+        pauseBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loop.pause();
             }
         });
     }
@@ -154,7 +138,7 @@ public class Pcap {
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Pcap");
-        frame.setContentPane(new Pcap().pcapPanel);
+        frame.setContentPane(new PcapUI().pcapPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
@@ -186,24 +170,30 @@ public class Pcap {
      */
     private void $$$setupUI$$$() {
         pcapPanel = new JPanel();
-        pcapPanel.setLayout(new GridLayoutManager(3, 3, new Insets(0, 0, 0, 0), -1, -1));
+        pcapPanel.setLayout(new GridLayoutManager(4, 3, new Insets(0, 0, 0, 0), -1, -1));
         nifComboBox = new JComboBox();
         pcapPanel.add(nifComboBox, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        start = new JButton();
-        start.setText("开始");
-        pcapPanel.add(start, new GridConstraints(0, 2, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         pacComboBox = new JComboBox();
         pcapPanel.add(pacComboBox, new GridConstraints(1, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         jScrollPane1 = new JScrollPane();
-        pcapPanel.add(jScrollPane1, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        pcapPanel.add(jScrollPane1, new GridConstraints(3, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         listTable = new JTable();
         listTable.setEnabled(true);
         listTable.putClientProperty("terminateEditOnFocusLost", Boolean.FALSE);
         jScrollPane1.setViewportView(listTable);
         jScrollPane2 = new JScrollPane();
-        pcapPanel.add(jScrollPane2, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        pcapPanel.add(jScrollPane2, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(300, 400), null, 0, false));
         packetDetailsTextArea = new JTextArea();
         jScrollPane2.setViewportView(packetDetailsTextArea);
+        filterTextField = new JTextField();
+        filterTextField.setText("");
+        pcapPanel.add(filterTextField, new GridConstraints(2, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        start = new JButton();
+        start.setText("开始");
+        pcapPanel.add(start, new GridConstraints(0, 2, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        pauseBtn = new JButton();
+        pauseBtn.setText("暂停");
+        pcapPanel.add(pauseBtn, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**
@@ -212,6 +202,7 @@ public class Pcap {
     public JComponent $$$getRootComponent$$$() {
         return pcapPanel;
     }
+
 }
 
 

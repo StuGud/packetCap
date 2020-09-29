@@ -15,7 +15,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
-public class ARPAttack {
+public class ARPAttackUI {
     private JPanel arpAttackPanel;
     private JComboBox nifCB;
     private JTextField destIPTF;
@@ -39,7 +39,7 @@ public class ARPAttack {
         return arpAttackPanel;
     }
 
-    public ARPAttack() {
+    public ARPAttackUI() {
         init();
 
         startBtn.addActionListener(new ActionListener() {
@@ -77,7 +77,7 @@ public class ARPAttack {
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("ARPAttack");
-        frame.setContentPane(new ARPAttack().arpAttackPanel);
+        frame.setContentPane(new ARPAttackUI().arpAttackPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);

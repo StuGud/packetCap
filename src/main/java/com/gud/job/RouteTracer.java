@@ -1,6 +1,5 @@
 package com.gud.job;
 
-import com.gud.gui.Pcap;
 import org.pcap4j.core.*;
 import org.pcap4j.packet.*;
 import org.pcap4j.packet.namednumber.*;
@@ -9,7 +8,6 @@ import org.pcap4j.util.MacAddress;
 import javax.swing.*;
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +36,10 @@ public class RouteTracer {
     long[] intervalTime = new long[N];
 
     private List<Long> startTime = new ArrayList<>();
+
+    public void setDstMacAddress(String dstMacAddressStr) {
+        this.dstMacAddress = MacAddress.getByName(dstMacAddressStr);
+    }
 
     public RouteTracer() {
         srcAddr= (Inet4Address) PcapUtils.getLocalHostIp();
@@ -207,7 +209,4 @@ public class RouteTracer {
             e.printStackTrace();
         }
     }
-
-
-
 }

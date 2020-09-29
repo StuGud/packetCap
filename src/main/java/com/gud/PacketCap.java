@@ -1,8 +1,9 @@
 package com.gud;
 
-import com.gud.gui.APITest;
-import com.gud.gui.ARPAttack;
-import com.gud.gui.Pcap;
+import com.gud.gui.APITestUI;
+import com.gud.gui.ARPAttackUI;
+import com.gud.gui.PcapUI;
+import com.gud.gui.RouteTracerUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,12 +21,12 @@ public class PacketCap extends JFrame {
     }
 
     public void init(){
-        this.setBounds(100, 100, 725, 624);
+        this.setBounds(50, 50, 850, 530);
         contentPane = new JPanel();
         //contentPane.setLayout(null);
         this.setContentPane(contentPane);
 
-        panel=new Pcap().getPcapPanel();
+        panel=new PcapUI().getPcapPanel();
         contentPane.add(panel);
         //panel.setLayout(null);
 
@@ -36,7 +37,7 @@ public class PacketCap extends JFrame {
         pcapMenuItem.addActionListener(arg0 -> {
             // TODO Auto-generated method stub
             contentPane.remove(panel);
-            panel=new Pcap().getPcapPanel();
+            panel=new PcapUI().getPcapPanel();
             contentPane.add(panel);
             setContentPane(contentPane);
         });
@@ -44,7 +45,7 @@ public class PacketCap extends JFrame {
         apiTestMenuItem.addActionListener(arg0 -> {
             // TODO Auto-generated method stub
             contentPane.remove(panel);
-            panel=new APITest().getApiTestPanel();
+            panel=new APITestUI().getApiTestPanel();
             contentPane.add(panel);
             setContentPane(contentPane);
         });
@@ -52,13 +53,22 @@ public class PacketCap extends JFrame {
         arpAttackMenuItem.addActionListener(arg0 -> {
             // TODO Auto-generated method stub
             contentPane.remove(panel);
-            panel=new ARPAttack().getArpAttackPanel();
+            panel=new ARPAttackUI().getArpAttackPanel();
+            contentPane.add(panel);
+            setContentPane(contentPane);
+        });
+        JMenuItem routeTracerMenuItem = new JMenuItem("tracert");
+        routeTracerMenuItem.addActionListener(arg0 -> {
+            // TODO Auto-generated method stub
+            contentPane.remove(panel);
+            panel=new RouteTracerUI().getRouteTracerPanel();
             contentPane.add(panel);
             setContentPane(contentPane);
         });
         menu.add(pcapMenuItem);
         menu.add(apiTestMenuItem);
         menu.add(arpAttackMenuItem);
+        menu.add(routeTracerMenuItem);
         mb.add(menu);
         mb.setVisible(true);
     }

@@ -15,7 +15,7 @@ import java.awt.event.ComponentAdapter;
 import java.util.HashMap;
 import java.util.Map;
 
-public class APITest {
+public class APITestUI {
     private JTextArea responseTextArea;
     private JButton sendButton;
     private JTextField urlTextField;
@@ -34,7 +34,7 @@ public class APITest {
         return apiTestPanel;
     }
 
-    public APITest() {
+    public APITestUI() {
         init();
         sendButton.addComponentListener(new ComponentAdapter() {
         });
@@ -104,7 +104,7 @@ public class APITest {
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("APITest");
-        frame.setContentPane(new APITest().apiTestPanel);
+        frame.setContentPane(new APITestUI().apiTestPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);

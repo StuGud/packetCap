@@ -1,12 +1,11 @@
 package com.gud.job;
 
-import com.gud.gui.Pcap;
+import com.gud.gui.PcapUI;
 import com.sun.jna.Platform;
 import org.pcap4j.core.*;
 import org.pcap4j.packet.*;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Loop {
     // 设置 COUNT 常量，代表本次捕获数据包的数目，其中 -1 代表一直捕获
@@ -28,6 +27,7 @@ public class Loop {
 
 
     private String filter="";
+
     public String getFilter() {
         return filter;
     }
@@ -100,8 +100,6 @@ public class Loop {
 
                   if(packet.contains(ArpPacket.class))
                   {
-
-
                       list.add(packet.get(ArpPacket.class).getHeader().getSrcHardwareAddr().toString());
                       list.add(packet.get(ArpPacket.class).getHeader().getDstHardwareAddr().toString());
                       list.add("ARP");
@@ -147,13 +145,20 @@ public class Loop {
 
 
                 }
-                if (packet.contains(packetType)) {
+                  if(packetType==Packet.class){
+                      PcapUI.tableModel4lt.addRow(list.toArray());
+                      //Pcap.tableModel4lt.fireTableDataChanged();
+                      packetVector.add(packetKey, packet);
+                      packetKey++;
+                  }else{
+                      if (packet.contains(packetType)) {
+                          PcapUI.tableModel4lt.addRow(list.toArray());
+                          //Pcap.tableModel4lt.fireTableDataChanged();
+                          packetVector.add(packetKey, packet);
+                          packetKey++;
+                      }
+                  }
 
-                    Pcap.tableModel4lt.addRow(list.toArray());
-//                      Pcap.tableModel4lt.fireTableDataChanged();
-                    packetVector.add(packetKey, packet);
-                    packetKey++;
-                }
             }
 
         };
@@ -187,9 +192,20 @@ public class Loop {
             // 关闭网卡
             handle.close();
         }
-
         packetKey = 0;
         packetVector.clear();
+    }
+
+    public void pause(){
+        if (handle!=null&&handle.isOpen()){
+            try {
+                handle.breakLoop();
+            } catch (NotOpenException e) {
+                e.printStackTrace();
+            }
+            // 关闭网卡
+            handle.close();
+        }
     }
 
     public PcapNetworkInterface getNif() {

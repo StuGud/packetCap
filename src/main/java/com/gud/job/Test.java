@@ -3,6 +3,7 @@ package com.gud.job;
 import org.pcap4j.util.MacAddress;
 
 import java.net.*;
+import java.util.Stack;
 
 public class Test {
     public static void main(String[] args) throws UnknownHostException {
@@ -10,6 +11,9 @@ public class Test {
         System.out.println(localHost);
         InetAddress srcAddr = PcapUtils.getLocalHostIp();
         System.out.println(PcapUtils.getMACAddress(srcAddr));
+
+
+        Stack<Integer> stack=new Stack<>();
 
     }
 }

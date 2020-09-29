@@ -19,9 +19,14 @@ public class RouteTracerUI {
     private JTextArea detailsTextArea;
     private JScrollPane detailsScrollPanel;
     private JComboBox nifComboBox;
+    private JTextField dstMACTextField;
 
     Thread traceThread = null;
     RouteTracer routeTracer = new RouteTracer();
+
+    public JPanel getRouteTracerPanel() {
+        return routeTracerPanel;
+    }
 
     private void init() {
         List<PcapNetworkInterface> allDevs = PcapUtils.getAllDevs();
@@ -42,6 +47,7 @@ public class RouteTracerUI {
                 String targetStr = targetTextField.getText();
                 //往traceRouter中传入detailsTextArea；
                 routeTracer.setNif((String) nifComboBox.getModel().getSelectedItem());
+                routeTracer.setDstMacAddress(dstMACTextField.getText());
 
                 traceThread = new Thread(() -> {
                     routeTracer.traceRoute(targetStr, detailsTextArea);
@@ -75,18 +81,23 @@ public class RouteTracerUI {
      */
     private void $$$setupUI$$$() {
         routeTracerPanel = new JPanel();
-        routeTracerPanel.setLayout(new GridLayoutManager(3, 2, new Insets(0, 0, 0, 0), -1, -1));
+        routeTracerPanel.setLayout(new GridLayoutManager(4, 2, new Insets(0, 0, 0, 0), -1, -1));
         traceBtn = new JButton();
         traceBtn.setText("trace");
         routeTracerPanel.add(traceBtn, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         targetTextField = new JTextField();
         routeTracerPanel.add(targetTextField, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         detailsScrollPanel = new JScrollPane();
-        routeTracerPanel.add(detailsScrollPanel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(400, 240), null, 0, false));
+        routeTracerPanel.add(detailsScrollPanel, new GridConstraints(2, 0, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(400, 240), null, 0, false));
         detailsTextArea = new JTextArea();
         detailsScrollPanel.setViewportView(detailsTextArea);
         nifComboBox = new JComboBox();
         routeTracerPanel.add(nifComboBox, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        dstMACTextField = new JTextField();
+        routeTracerPanel.add(dstMACTextField, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        final JLabel label1 = new JLabel();
+        label1.setText("路由器MAC地址");
+        routeTracerPanel.add(label1, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_SOUTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**
